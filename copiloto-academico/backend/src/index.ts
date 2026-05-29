@@ -15,6 +15,9 @@ import { config } from './config';
 
 const app = express();
 
+// Railway e Vercel ficam atrás de proxies reversos — necessário para rate-limit e HTTPS
+app.set('trust proxy', 1);
+
 // ============================================================
 // Middlewares de segurança
 // ============================================================
