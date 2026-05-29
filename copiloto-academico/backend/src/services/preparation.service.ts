@@ -7,7 +7,7 @@
  * Regra de cache: antes de chamar a OpenAI, verifica se já existe
  * GeneratedContent para (userId, materialId, type). Se existir, pula.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import * as aiService from './ai.service';
 import { logger } from '../utils/logger';
 
@@ -148,8 +148,8 @@ async function runPreparation(userId: string, courseId: string): Promise<void> {
 // ============================================================
 
 type LearningProfileRecord = NonNullable<
-  Awaited<ReturnType<typeof prisma.user.findUnique>>
->['learningProfile'] & object;
+  Prisma.UserGetPayload<{ include: { learningProfile: true } }>['learningProfile']
+>;
 
 function buildStudentProfile(profile: NonNullable<LearningProfileRecord>): aiService.StudentProfile {
   const sportsData = profile.sportsProfile as { practiced?: string[]; liked?: string[] } | null;

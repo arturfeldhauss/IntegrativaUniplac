@@ -9,7 +9,8 @@
       "Bash(Get-ChildItem \"c:\\\\Users\\\\Pichau\\\\OneDrive\\\\Desktop\\\\Estudos e Crusos\\\\Integrativa\\\\copiloto-academico\\\\frontend\\\\src\\\\pages\" -Filter \"*.tsx\")",
       "Bash(Select-Object Name)",
       "PowerShell(\\(Get-Content \"c:\\\\Users\\\\Pichau\\\\OneDrive\\\\Desktop\\\\Estudos e Crusos\\\\Integrativa\\\\copiloto-academico\\\\frontend\\\\src\\\\pages\\\\OnboardingPage.tsx\"\\).Count)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npm run *)"
     ]
   }
 }
