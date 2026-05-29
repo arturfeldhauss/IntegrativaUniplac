@@ -51,8 +51,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (newToken: string) => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
-    await fetchUser(newToken);
-  }, [fetchUser]);
+    try {
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+      const { data } = await api.get<{ success: boolean; data: User }>('/auth/me');
+      setUser(data.data);
+    } catch (error) {
+      localStorage.removeItem('token');
+      setToken(null);
+      setUser(null);
+      delete api.defaults.headers.common['Authorization'];
+      throw error;
+    }
+  }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');

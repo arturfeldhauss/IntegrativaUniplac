@@ -3,7 +3,8 @@
  * Apresenta a plataforma como ambiente acadêmico inteligente.
  * Sem menções a IA — a tecnologia existe como motor invisível.
  */
-import { GraduationCap, BookOpen, Zap, Target, ArrowRight, CheckCircle } from 'lucide-react';
+import { GraduationCap, BookOpen, Zap, Target, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
 const FEATURES = [
   {
@@ -30,7 +31,20 @@ const HIGHLIGHTS = [
   'Ambiente adaptado ao seu objetivo profissional',
 ];
 
+const LOGIN_ERRORS: Record<string, string> = {
+  access_denied: 'Você cancelou o acesso. Tente novamente e aceite as permissões solicitadas.',
+  auth_failed: 'Falha na autenticação com o Google. Tente novamente.',
+  redirect_uri_mismatch: 'Erro de configuração OAuth. Contate o suporte.',
+  invalid_token: 'Sessão expirada. Por favor, faça login novamente.',
+  api_not_enabled: 'APIs do Google Classroom não habilitadas. Contate o suporte.',
+  insufficient_scope: 'Permissões insuficientes. Tente novamente e aceite todos os escopos.',
+};
+
 export default function LoginPage() {
+  const [searchParams] = useSearchParams();
+  const errorCode = searchParams.get('error');
+  const errorMessage = errorCode ? (LOGIN_ERRORS[errorCode] ?? `Erro: ${errorCode}`) : null;
+
   function handleGoogleLogin() {
     const base = (import.meta.env['VITE_API_URL'] || 'http://localhost:3000/api').replace(/\/api\/?$/, '');
     window.location.href = `${base}/api/auth/google`;
@@ -105,6 +119,14 @@ export default function LoginPage() {
               Entre com sua conta Google para acessar seus materiais do Classroom
             </p>
           </div>
+
+          {/* Erro de callback OAuth */}
+          {errorMessage && (
+            <div className="mb-5 flex items-start gap-3 p-3.5 bg-red-50 border border-red-200 rounded-xl">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-red-700 text-xs leading-relaxed">{errorMessage}</p>
+            </div>
+          )}
 
           {/* Botão de login */}
           <button
