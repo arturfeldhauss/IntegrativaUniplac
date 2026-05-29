@@ -1,0 +1,210 @@
+// =============================================================
+// COPILOTO ACADÊMICO — Schema MVP
+// Simplificado para entregar rápido e funcionar bem
+// =============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// USUÁRIO — tudo em uma tabela só (sem GoogleAccount separada)
+// ============================================================
+
+model User {
+  id           String    @id @default(cuid())
+  googleId     String    @unique
+  email        String    @unique
+  name         String
+  picture      String?
+
+  // Google OAuth tokens (armazenados diretamente no User)
+  accessToken  String?   @db.Text
+  refreshToken String?   @db.Text
+  tokenExpiry  DateTime?
+
+  // Status do onboarding
+  varkCompleted Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses          Course[]
+  learningProfile  LearningProfile?
+  varkAssessments  VarkAssessment[]
+  generatedContent GeneratedContent[]
+
+  @@map("users")
+}
+
+// ============================================================
+// PERFIL DE APRENDIZAGEM VARK
+// ============================================================
+
+model LearningProfile {
+  id               String @id @default(cuid())
+  userId           String @unique
+  user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Pontuação em cada dimensão (0-16)
+  visualScore      Int    @default(0)
+  auditoryScore    Int    @default(0)
+  readingScore     Int    @default(0)
+  kinestheticScore Int    @default(0)
+
+  // Estilos predominantes
+  primaryStyle     String  // 'visual' | 'auditory' | 'reading' | 'kinesthetic'
+  secondaryStyle   String? // segundo estilo mais pontuado
+
+  // Perfil esportivo — {practiced: string[], liked: string[], followed: string[], level: string}
+  sportsProfile    Json?
+
+  // Objetivo profissional — ex: 'biomecânica', 'treinamento', 'reabilitação'
+  careerGoal       String?
+
+  // Preferências de estudo — {summaryLength: 'short'|'detailed', prefersExamples: bool, prefersRealCases: bool, learningMode: string}
+  studyPreference  Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("learning_profiles")
+}
+
+/// Respostas do questionário VARK (histórico)
+model VarkAssessment {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Array JSON: [{questionId: string, answer: 'V'|'A'|'R'|'K'}]
+  answers Json
+
+  createdAt DateTime @default(now())
+
+  @@map("vark_assessments")
+}
+
+// ============================================================
+// GOOGLE CLASSROOM — Disciplinas e Conteúdo
+// ============================================================
+
+model Course {
+  id             String   @id @default(cuid())
+  googleId       String
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name           String
+  section        String?
+  description    String?  @db.Text
+  courseState    String?
+  enrollmentCode String?
+  alternateLink  String?
+
+  // Status de preparação do conteúdo adaptado
+  preparationStatus String    @default("PENDING") // PENDING | PROCESSING | READY | ERROR
+  preparedAt        DateTime?
+  preparationError  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  materials        Material[]
+  assignments      Assignment[]
+  generatedContent GeneratedContent[]
+
+  @@unique([googleId, userId])
+  @@map("courses")
+}
+
+/// Materiais e anúncios postados no Classroom
+/// Attachments salvos como JSON para simplificar
+model Material {
+  id          String    @id @default(cuid())
+  googleId    String
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?   @db.Text
+  type        String    // 'material' | 'announcement'
+  state       String?   // 'PUBLISHED' | 'DRAFT'
+  alternateLink String?
+
+  // Attachments como JSON: [{type, title, url, driveFileId, mimeType}]
+  attachments Json?
+
+  // Texto extraído de PDFs (para IA processar)
+  extractedText String? @db.Text
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  generatedContent GeneratedContent[]
+
+  @@unique([googleId, courseId])
+  @@map("materials")
+}
+
+/// Atividades e tarefas do Classroom
+model Assignment {
+  id          String    @id @default(cuid())
+  googleId    String
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?   @db.Text
+  dueDate     DateTime?
+  maxPoints   Float?
+  state       String?
+  workType    String?   // 'ASSIGNMENT' | 'SHORT_ANSWER_QUESTION' | 'MULTIPLE_CHOICE_QUESTION'
+  alternateLink String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([googleId, courseId])
+  @@map("assignments")
+}
+
+// ============================================================
+// IA — Todo conteúdo gerado numa tabela só
+// O campo `content` armazena texto ou JSON dependendo do type
+// ============================================================
+
+model GeneratedContent {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  materialId String?
+  material   Material? @relation(fields: [materialId], references: [id])
+  courseId   String?
+  course     Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  // Tipo do conteúdo gerado
+  type       String    // 'summary' | 'flashcards' | 'quiz' | 'study_guide'
+
+  // O conteúdo em si (Markdown para summary/study_guide, JSON string para flashcards/quiz)
+  content    String    @db.Text
+
+  // Estilo VARK usado para personalizar (para auditoria/debug)
+  varkStyle  String
+
+  // Título do material que originou (para exibir na UI)
+  sourceTitle String?
+
+  // Gerado automaticamente pelo pipeline (vs. gerado manualmente)
+  autoGenerated Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@map("generated_content")
+}

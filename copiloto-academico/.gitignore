@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Environment files - NUNCA commitar esses arquivos!
+.env
+.env.local
+.env.production
+backend/.env
+frontend/.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Prisma
+backend/prisma/migrations/
+# Manter o schema mas ignorar migrations geradas automaticamente
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/

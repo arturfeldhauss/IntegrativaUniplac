@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(64\\).toString\\('hex'\\)\\)\")",
+      "PowerShell(cd \"c:\\\\Users\\\\Pichau\\\\OneDrive\\\\Desktop\\\\Estudos e Crusos\\\\Integrativa\\\\copiloto-academico\\\\backend\"; $env:DATABASE_URL=\"postgresql://postgres:postgres@localhost:5432/copiloto_academico\"; npx prisma db push --skip-generate 2>&1 | Select-Object -First 20)",
+      "PowerShell(Get-Service \"postgresql-x64-17\", \"postgresql-x64-18\")",
+      "PowerShell(Get-Service \"postgresql-x64-17\")",
+      "Bash(npx prisma *)",
+      "Bash(Get-ChildItem \"c:\\\\Users\\\\Pichau\\\\OneDrive\\\\Desktop\\\\Estudos e Crusos\\\\Integrativa\\\\copiloto-academico\\\\frontend\\\\src\\\\pages\" -Filter \"*.tsx\")",
+      "Bash(Select-Object Name)",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\Pichau\\\\OneDrive\\\\Desktop\\\\Estudos e Crusos\\\\Integrativa\\\\copiloto-academico\\\\frontend\\\\src\\\\pages\\\\OnboardingPage.tsx\"\\).Count)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}
