@@ -129,12 +129,12 @@ export async function prepareCourse(req: Request, res: Response, next: NextFunct
     if (!course) throw new AppError('Disciplina não encontrada', 404);
 
     if (course.preparationStatus === 'PROCESSING') {
-      res.json({ success: true, message: 'Preparação já em andamento', status: 'PROCESSING' });
+      res.json({ success: true, data: { status: 'PROCESSING', message: 'Preparação já em andamento' } });
       return;
     }
 
     if (course.preparationStatus === 'READY') {
-      res.json({ success: true, message: 'Conteúdo já preparado', status: 'READY' });
+      res.json({ success: true, data: { status: 'READY', message: 'Conteúdo já preparado' } });
       return;
     }
 
@@ -142,8 +142,7 @@ export async function prepareCourse(req: Request, res: Response, next: NextFunct
 
     res.status(202).json({
       success: true,
-      message: 'Preparação iniciada. Acompanhe o status pelo campo preparationStatus.',
-      status: 'PROCESSING',
+      data: { status: 'PROCESSING', message: 'Preparação iniciada. Acompanhe o status pelo campo preparationStatus.' },
     });
   } catch (error) {
     next(error);
@@ -179,8 +178,7 @@ export async function refreshCourseContent(req: Request, res: Response, next: Ne
 
     res.status(202).json({
       success: true,
-      message: 'Regeneração iniciada.',
-      status: 'PROCESSING',
+      data: { status: 'PROCESSING', message: 'Regeneração iniciada.' },
     });
   } catch (error) {
     next(error);

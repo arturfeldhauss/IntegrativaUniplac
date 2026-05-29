@@ -18,7 +18,6 @@ import {
   CheckCircle2, Clock, Brain, Map as MapIcon, ChevronRight,
   Loader2, AlertCircle, Sparkles,
 } from 'lucide-react';
-import api from '../services/api';
 import { coursesService } from '../services/courses.service';
 import { syncService } from '../services/sync.service';
 import { PageLoader } from '../components/ui/LoadingSpinner';
@@ -26,11 +25,6 @@ import toast from 'react-hot-toast';
 import type { Course, Material, Assignment, MaterialAttachment, ContentType, CourseGeneratedContentResponse } from '../types';
 
 type TabType = 'materials' | 'assignments' | 'announcements';
-
-async function fetchCourse(id: string): Promise<Course> {
-  const { data } = await api.get<{ success: boolean; data: Course }>(`/courses/${id}`);
-  return data.data;
-}
 
 // ============================================================
 // Sub-componentes
@@ -266,7 +260,7 @@ export default function CourseDetailPage() {
 
   const { data: course, isLoading } = useQuery({
     queryKey: ['course', id],
-    queryFn: () => fetchCourse(id!),
+    queryFn: () => coursesService.getById(id!),
     enabled: !!id,
     refetchInterval: (query) => {
       const status = query.state.data?.preparationStatus;

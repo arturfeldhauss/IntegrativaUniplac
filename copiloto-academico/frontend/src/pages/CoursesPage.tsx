@@ -9,14 +9,9 @@ import {
   ArrowRight, Clock, CheckCircle2, AlertCircle, Loader2,
 } from 'lucide-react';
 import { useState } from 'react';
-import api from '../services/api';
+import { coursesService } from '../services/courses.service';
 import { PageLoader } from '../components/ui/LoadingSpinner';
 import type { Course, PreparationStatus } from '../types';
-
-async function fetchCourses(): Promise<Course[]> {
-  const { data } = await api.get<{ success: boolean; data: Course[] }>('/courses');
-  return data.data;
-}
 
 const PREP_STATUS_CONFIG: Record<PreparationStatus, {
   label: string;
@@ -63,7 +58,7 @@ export default function CoursesPage() {
 
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ['courses'],
-    queryFn: fetchCourses,
+    queryFn: coursesService.getAll,
     // Polling enquanto alguma disciplina estiver sendo preparada
     refetchInterval: (query) => {
       const data = query.state.data;

@@ -32,7 +32,8 @@ const HIGHLIGHTS = [
 
 export default function LoginPage() {
   function handleGoogleLogin() {
-    window.location.href = `${import.meta.env['VITE_API_URL'] || 'http://localhost:3000/api'}/auth/google`;
+    const base = (import.meta.env['VITE_API_URL'] || 'http://localhost:3000/api').replace(/\/api\/?$/, '');
+    window.location.href = `${base}/api/auth/google`;
   }
 
   return (

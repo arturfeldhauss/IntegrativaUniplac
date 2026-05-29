@@ -25,7 +25,7 @@ export const coursesService = {
     const { data } = await api.post<ApiResponse<{ status: string; message: string }>>(
       `/courses/${courseId}/prepare`
     );
-    return data.data ?? { status: data['status'] as string, message: data['message'] as string };
+    return data.data ?? { status: 'ok', message: data.message ?? '' };
   },
 
   /** Invalida o conteúdo gerado e reinicia a preparação. */
@@ -33,7 +33,7 @@ export const coursesService = {
     const { data } = await api.post<ApiResponse<{ status: string; message: string }>>(
       `/courses/${courseId}/refresh`
     );
-    return data.data ?? { status: data['status'] as string, message: data['message'] as string };
+    return data.data ?? { status: 'ok', message: data.message ?? '' };
   },
 
   /** Retorna status de conteúdo gerado por material da disciplina. */
